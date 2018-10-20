@@ -1,4 +1,5 @@
 import * as functions from 'firebase-functions';
+import * as admin from 'firebase-admin';
 
 const Client = require('node-rest-client').Client;
  
@@ -8,8 +9,7 @@ const apiBase = 'https://api.aerisapi.com/forecasts/';
 const apiClient = 'HVptD2sYYxVqQ883K7Bkq';
 const apiSecret = 'u56EL25cFJ9GACs6oVTL2PgPBLYd9lkasSFTzxdl';
 
-const admin = require('firebase-admin');
-admin.initializeApp();
+admin.initializeApp(functions.config().firebase);
 const db = admin.firestore();
 
 // // Start writing Firebase Functions
@@ -65,7 +65,7 @@ export const TestCreateForecast = functions.https.onRequest(async (request, resp
 async function CreateForecastFirestore(forecastPct: number, forecastDate: Date, launchId: string){
 
 
-    const newDocRef = await db.collection('Launches').doc(launchId).colletion('Forecast').doc();
+    const newDocRef = await db.collection('Launches').doc(launchId).collection('Forecast').doc();
 
     const setDoc = await newDocRef.set({
         DateCalculated: new Date(),
