@@ -14,11 +14,13 @@ const apiSecret = 'u56EL25cFJ9GACs6oVTL2PgPBLYd9lkasSFTzxdl';
 export const ReadEndpoint = functions.https.onRequest(async (request, response) => {
 
     let zip = request.query.zip;
+    let day = new Date(Date.parse(request.query.date));
+
+    console.log('Input data', zip, day)
     if (!zip){
         zip = '32899'
     }
 
-    let day = new Date(request.query.date);
     if (!day){
         day = new Date();
     }
