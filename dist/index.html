@@ -10,11 +10,17 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
     crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gauge.js/1.3.6/gauge.min.js" crossorigin="anonymous"></script>
+  <script src="stl_viewer.min.js"></script> 
 
   <!-- This part is a bunch of styles to handle the loading spinner for the page -->
   <style>
-    .card-img-top {
-      height: 167px;
+    img {
+      max-width: 200px;
+      max-height: 200px;
+    }
+
+    .card {
+      margin: 10px;
     }
 
     /* Absolute Center Spinner */
@@ -125,72 +131,162 @@
 
 </head>
 
-<body>
+<body background="potw1840a.jpg">
   <!-- This section is what the skeleton of the page is, including the "loding" div -->
   <div class="container">
 
     <div class="jumbotron">
-      <h1 class="display-4">Whats Going UP</h1>
-      <p class="lead">This is a simple demo of a rocket launch website</p>
+      <h1 class="display-4">Weather To Launch</h1>
+      <p class="lead">The optimized experience for the inquisitive rocketeer!</p>
+      <hr class="my-2">
+      <p>This site was built by a group of rocket launch enthusiasts who were frustrated with taking time out of our day to watch a launch, only to have it scrubbed at the last second.  This website shows the critical factors for a launch to help make an informed decision about if the launch will proceed or not. We hope you will enjoy this site as much as we enjoyed building it!</p>
+      <p>
+        Visit our project at:
+        <ul class="list-group">
+            <li class="list-group-item">
+                <a href="https://2018.spaceappschallenge.org/challenges/can-you-build/when-next-rocket-launch/teams/whats-going-up/project" target="_blank">2018 NASA Space Apps Challenge</a>
+            </li>
+            <li class="list-group-item">
+                <a href="https://github.com/codegenesis/whatsgoingup" target="_blank">Project Github</a>
+            </li>
+          </ul>
+      </p>
     </div>
 
     <div class="loading" id="loader"></div>
-    <div id="accordion"></div>
+    <div class="alert alert-info" role="alert" id="loader2">
+      <strong>Dont Take Off! </strong> We are loading your rocket data...
+    </div>
+    <div id="accordion">
+    </div>
   </div>
-
 
   <script>
 
     // This here is the base "template" which is copied for each rocket entry. It follows the bootstrap "accordion" pattern. 
     //    Also note the {{}} vairbles which are different between each rocket. You will see later how they are repalced by rocket details
     var rocketRow = `
-        <div class="card">
-          <div class="card-header" id="heading{{INDEX}}">
-            <h5 class="mb-0">
-              <button class="btn btn-link" data-toggle="collapse" data-target="#collapse{{INDEX}}" aria-expanded="true"
-                aria-controls="collapse{{INDEX}}">
-                {{LAUNCHNAME}}
-              </button>
-            </h5>
+    
+    <div class="row">
+    <div class="col-lg-12">
+      <div class="card my-3">
+        <div class="card-body">
+          <div class="row">
+              <div class="col-lg-12">
+                <table width="100%">
+                  <tr>
+                    <td width="20%"><img src="{{IMGSRC}}" alt="Rocket Picture"></td>
+                    <td width="80%" class="align-middle"><h2>{{LAUNCHNAME}}</h2></td>
+                  </tr>
+                </table>
+              </div>
           </div>
 
-          <div id="collapse{{INDEX}}" class="collapse show" aria-labelledby="heading{{INDEX}}" data-parent="#accordion">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-4">
-
-                        <div class="card">
-                            <canvas class="card-img-top" id="Speed-Gauge{{INDEX}}"></canvas>
-                            <div class="card-body">
-                                <h5 class="card-title">Wind Speed</h5>
-                                <p class="card-text">Launch is delayed if wind speed is over 30 KTS.</p>
-                            </div>
-                        </div>
-
-                    </div>
-                    <div class="col-4">
-
-                        <div class="card">
-                            <canvas class="card-img-top" id="Temp-Gauge{{INDEX}}"></canvas>
-                            <div class="card-body">
-                                <h5 class="card-title">Thunder Storms</h5>
-                                <p class="card-text">Launch is delayed thunderstorms are nearby.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-4">
-                        <div class="card">
-                            <img src="{{IMGSRC}}" class="card-img-top" alt="Rocket Picture">
-                            <div class="card-body">
-                                <h5 class="card-title">{{ROCKETNAME}}</h5>
-                                <a href="{{ROCKETLINK}}" target="_blank" class="btn btn-primary">Wikipeida</a>
-                            </div>
-                        </div>
-                    </div>
+          <div class="row">
+            <div class="col-lg-12">
+              <p class="card-text">
+                <ul class="list-group">
+                  <li class="list-group-item">{{MISSIONDESC}}</li>
+                  <li class="list-group-item">{{LAUNCHDATE}}</li>
+                  <li class="list-group-item">{{LAUNCHWINDOW}}</li>
+                  <li class="list-group-item">{{LAUNCHSITE}}</li>
+                </ul>
+              </p>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-3">
+              <div class="card">
+                <canvas class="card-img-top" id="Speed-Gauge{{INDEX}}"></canvas>
+                <div class="card-body">
+                  <h5 class="card-title">Max Wind Speed <br> (KTS)</h5>
+                  <p class="card-text">Current forecasted max wind speed is shown. Launch is delayed if wind speed is over 30 KTS.</p>
                 </div>
+              </div>
+            </div>
+            <div class="col-lg-3">
+              <div class="card">
+                <canvas class="card-img-top" id="Thunder-Gauge{{INDEX}}"></canvas>
+                <div class="card-body">
+                  <h5 class="card-title">Thunder Storms <br> (% Chance)</h5>
+                  <p class="card-text">Current forecasted percent change of thunderstorms is showwn. Launch is delayed if thunderstorms are nearby.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3">
+              <div class="card">
+                <canvas class="card-img-top" id="Cloud-Gauge{{INDEX}}"></canvas>
+                <div class="card-body">
+                  <h5 class="card-title">Cloud Cover <br> (% Coverage)</h5>
+                  <p class="card-text">Current forecasted percent cloud coverage is shown. The thicker the cloud coverage, the riskier the launch.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3">
+              <div class="card">
+                <canvas class="card-img-top" id="Window-Gauge{{INDEX}}"></canvas>
+                <div class="card-body">
+                  <h5 class="card-title">Launch Window <br> (Minutes)</h5>
+                  <p class="card-text">Shorter windows provide less options to handle inclement weather. Zero minute window indicates the window has not been set yet, check back later.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-4">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">VECHICLE</h5>
+                  <div id="stl_cont{{INDEX}}"></div> 
+                  <p class="card-text">Name: {{ROCKETNAME}}</p>
+                  <a href="{{ROCKETLINK}}" target="_blank" class="btn btn-primary">Wikipedia Link</a>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-8">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">PAYLOADS</h5>
+                  <ul class="list-group">
+                    {{PAYLOADS}}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-4">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">LAUNCH SITE</h5>
+                  <p class="card-text">{{LAUNCHSITE}}</p>
+                  <a href="{{PADLINK}}" target="_blank" class="btn btn-primary">Map</a>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-4">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">Watch the Launch</h5>
+                  <ul class="list-group">
+                    {{VIDEOURLS}}
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-4">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">SOCIAL MEDIA</h5>
+                  <p class="card-text">{{HASHTAG}}</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
         `;
 
     // This part uses JQuery to ping the endpoint with the appripriate "CORS" headers to get our rocket launches. Note the "success:" callback function which is called when the request is returned
@@ -213,6 +309,7 @@
           // Make a duplicate of the template html
           var myRow = Object.assign(rocketRow);
 
+          
           // Replace all of those {{}} lookup functions with the appropriate rocket name
           myRow = myRow.replaceAll("{{LAUNCHNAME}}", element.name);
           myRow = myRow.replaceAll("{{INDEX}}", index);
@@ -220,11 +317,76 @@
           myRow = myRow.replaceAll("{{ROCKETNAME}}", element.rocket.name);
           myRow = myRow.replaceAll("{{ROCKETLINK}}", element.rocket.wikiURL);
 
+          var datest = new Date(Date.parse(element.windowstart)).toLocaleString();
+          myRow = myRow.replaceAll("{{LAUNCHDATE}}", 'Launch Window Opens: ' + datest);
+
+          var dateend = new Date(Date.parse(element.windowend)).toLocaleString();
+          myRow = myRow.replaceAll("{{LAUNCHWINDOW}}", 'Launch Window Closes: ' + dateend);
+
+          let urls = "";
+          if (element.vidURLs.length > 0){
+            element.vidURLs.forEach((url, index) => {
+              urls = urls + `
+                <li class="list-group-item">
+                  <a href="` + url + `" target="_blank" class="btn btn-primary">Video ` + (index + 1) + `</a>
+                </li>`
+            });
+          } else {
+            urls = 'There are no videos available.'
+          }
+          
+          myRow = myRow.replaceAll("{{VIDEOURLS}}", urls);
+
+          if (element.location) {
+            myRow = myRow.replaceAll("{{LAUNCHSITE}}", 'Launch Loaction: ' + element.location.name);
+
+            if (element.location.pads.length > 0) {
+              myRow = myRow.replaceAll("{{PADLINK}}", element.location.pads[0].mapURL);
+            } else {
+              myRow = myRow.replaceAll("{{PADLINK}}", '#');
+            }
+
+          } else {
+            myRow = myRow.replaceAll("{{LAUNCHSITE}}", 'Launch Loaction: Unknown');
+            myRow = myRow.replaceAll("{{PADLINK}}", '#');
+          }
+
+          if (element.hashtag) {
+            const tag = element.hashtag.replace("#", '');
+            myRow = myRow.replaceAll("{{HASHTAG}}", '<a href="https://twitter.com/hashtag/' + tag + '"  target="_blank" class="btn btn-primary">' + element.hashtag + '</a>');
+          } else {
+            myRow = myRow.replaceAll("{{HASHTAG}}", 'No Hashtags found');
+          }
+
+          if (element.missions.length > 0) {
+            myRow = myRow.replaceAll("{{MISSIONDESC}}", 'Mission Overview: ' + element.missions[0].description);
+
+            if (element.missions[0].payloads.length > 0) {
+              let payloadItems = "";
+              element.missions[0].payloads.forEach(payload => {
+                payloadItems = payloadItems + '<li class="list-group-item"><a href="https://www.google.com/search?q=' + payload.name + '"  target="_blank" class="btn btn-primary">' + payload.name + '</a></li>'
+              })
+
+              myRow = myRow.replaceAll("{{PAYLOADS}}", payloadItems);
+            } else {
+              myRow = myRow.replaceAll("{{PAYLOADS}}", '<li class="list-group-item">No Payloads Found!</li>');
+            }
+
+          } else {
+            myRow = myRow.replaceAll("{{MISSIONDESC}}", 'Mission Overview: Unknown');
+            myRow = myRow.replaceAll("{{PAYLOADS}}", '<li class="list-group-item">No Payloads Found!</li>');
+          }
+
+
+
           // Append the completed template to the accordian element in the page skeleton
           $('#accordion').append(myRow);
 
           // For each newly appended item, make the gages work, see the "UpdateElements" function bleow
           UpdateElements(index, element);
+
+          // For each newly appended item, init stl viewer
+          //var stl_viewer = new StlViewer(document.getElementById("stl_cont" + index), { models: [ {id:0, filename:"models/Falcon_9.stl"} ] }); 
 
           // Dump the elemnt to the console so we can see what it all contains, useful for debugging. Alt + F11 to open it in chrome.
           console.log('element', element);
@@ -237,6 +399,7 @@
 
         // Finally, hide the loader spinner because we have data
         $('#loader').hide();
+        $('#loader2').hide();
       }
     });
 
@@ -246,6 +409,7 @@
 
       // Just in case we don't have predictors in the data set (because of no launch pad?), set he defaults to "0" value;
       if (element.WGUPred.Predictors.length === 0) {
+        element.WGUPred.Predictors.push({ 'Value': 0 });
         element.WGUPred.Predictors.push({ 'Value': 0 });
         element.WGUPred.Predictors.push({ 'Value': 0 });
       }
@@ -274,10 +438,11 @@
         ],
         staticLabels: {
           font: "16px sans-serif",  // Specifies font
-          labels: [0, 20, 30, 50],  // Print labels at these values
+          labels: [0, 10, 20, 30, 40, 50],  // Print labels at these values
           color: "#000000",  // Optional: Label text color
           fractionDigits: 0  // Optional: Numerical precision. 0=round off.
         },
+        radiusScale: 0.8,
       };
 
       // Create the windspeed gage
@@ -286,7 +451,7 @@
       selectGauge.set(element.WGUPred.Predictors[0].Value);
 
       // Set the defaults for the thunder gage
-      var TempOpts = {
+      var TstormOpts = {
         angle: -0.2, // The span of the gauge arc
         lineWidth: 0.2, // The line thickness
         radiusScale: 1, // Relative radius
@@ -303,22 +468,72 @@
         generateGradient: true,
         highDpiSupport: true,     // High resolution support
         staticZones: [
-          { strokeStyle: "#00FF00", min: 0, max: 60 }, // Green
-          { strokeStyle: "#FFDD00", min: 60, max: 100 }, // Yellow
+          { strokeStyle: "#00FF00", min: 0, max: 66 }, // Green
+          { strokeStyle: "#FFDD00", min: 66, max: 90 }, // Yellow
           { strokeStyle: "#FF0000", min: 90, max: 100 }, // Red from 100 to 130
         ],
         staticLabels: {
           font: "16px sans-serif",  // Specifies font
-          labels: [0, 60, 90, 100],  // Print labels at these values
+          labels: [0, 33, 66, 90, 100],  // Print labels at these values
           color: "#000000",  // Optional: Label text color
           fractionDigits: 0  // Optional: Numerical precision. 0=round off.
         },
+        radiusScale: 0.8,
       };
 
       // configure the tunder gage
-      selectGauge = new Gauge(document.getElementById("Temp-Gauge" + index)).setOptions(TempOpts);;
+      selectGauge = new Gauge(document.getElementById("Thunder-Gauge" + index)).setOptions(TstormOpts);;
       selectGauge.maxValue = 100;
       selectGauge.set(element.WGUPred.Predictors[1].Value * 100);
+      //selectGauge.set(45);
+
+      // configure the tunder gage
+      selectGauge = new Gauge(document.getElementById("Cloud-Gauge" + index)).setOptions(TstormOpts);;
+      selectGauge.maxValue = 100;
+      selectGauge.set(element.WGUPred.Predictors[2].Value * 100);
+      //selectGauge.set(80);
+
+      // Set the defaults for the duration gage
+      var WindowOpts = {
+        angle: -0.2, // The span of the gauge arc
+        lineWidth: 0.2, // The line thickness
+        radiusScale: 1, // Relative radius
+        pointer: {
+          length: 0.6, // // Relative to gauge radius
+          strokeWidth: 0.035, // The thickness
+          color: '#000000' // Fill color
+        },
+        limitMax: false,     // If false, max value increases automatically if value > maxValue
+        limitMin: false,     // If true, the min value of the gauge will be fixed
+        colorStart: '#6FADCF',   // Colors
+        colorStop: '#8FC0DA',    // just experiment with them
+        strokeColor: '#E0E0E0',  // to see which ones work best for you
+        generateGradient: true,
+        highDpiSupport: true,     // High resolution support
+        staticZones: [
+          { strokeStyle: "#FF0000", min: 0, max: 30 }, // Red from 100 to 130
+          { strokeStyle: "#FFDD00", min: 30, max: 90 }, // Yellow
+          { strokeStyle: "#00FF00", min: 90, max: 180 }, // Green
+        ],
+        staticLabels: {
+          font: "16px sans-serif",  // Specifies font
+          labels: [0, 30, 60, 90, 120, 150, 180],  // Print labels at these values
+          color: "#000000",  // Optional: Label text color
+          fractionDigits: 0  // Optional: Numerical precision. 0=round off.
+        },
+        radiusScale: 0.75,
+      };
+
+      // configure the tunder gage
+      selectGauge = new Gauge(document.getElementById("Window-Gauge" + index)).setOptions(WindowOpts);
+      selectGauge.maxValue = 180;
+
+      let start = new Date(Date.parse(element.windowstart));
+      let end = new Date(Date.parse(element.windowend));
+      let windowLength = end.valueOf() - start.valueOf();
+      windowLength = Math.floor((windowLength / 1000) / 60);
+
+      selectGauge.set(windowLength);
     }
 
     // This is a handy function ro replace ALL of the items (string.replace() only gets the first occurence!)

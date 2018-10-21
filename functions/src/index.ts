@@ -91,6 +91,7 @@ async function CalcLaunchPredictors(loc: string, day: Date, launchId: string = n
     const outputValues: DataPoint[] = [];
     outputValues.push(CalcWindSpeed(data.windSpeedMaxKTS, 30));
     outputValues.push(CalcTStorm(data.weatherPrimaryCoded));
+    outputValues.push(CalcCloudCoverage(data.cloudsCoded));
 
     output.Predictors = outputValues;
   }
@@ -294,22 +295,44 @@ function CalcTStorm(weatherPrimaryCoded: string): DataPoint {
   }
 }
 
+function CalcCloudCoverage(cloudCovCoded: string): DataPoint {
+
+  const type = cloudCovCoded.split(":");
+
+  let curPct = 0;
+
+  if (type[2] === "T") {
+    curPct = calcCovergePct(type[1]);
+  }
+
+  return {
+    Name: 'T Storm Likleyhood',
+    Value: curPct,
+    Threshold: 1,
+    HighValue: true,
+  }
+}
+
 function calcCovergePct(str: string): number {
 
-  if (str === "VL") {
-    return 0.15;
+  if (str === "CL") {
+    return 0.07;
   }
 
-  if (str === "L") {
-    return 0.30;
+  if (str === "FW") {
+    return 0.32;
   }
 
-  if (str === "H") {
-    return 0.75;
+  if (str === "SC") {
+    return 0.50;
   }
 
-  if (str === "VH") {
-    return 1;
+  if (str === "BK") {
+    return 80;
+  }
+
+  if (str === "OV") {
+    return 100;
   }
 
   return 0.5
