@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+    crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gauge.js/1.3.6/gauge.min.js" crossorigin="anonymous"></script>
+
+  <!-- This part is a bunch of styles to handle the loading spinner for the page -->
+  <style>
+    .card-img-top {
+      height: 167px;
+    }
+
+    /* Absolute Center Spinner */
+    .loading {
+      position: fixed;
+      z-index: 999;
+      height: 2em;
+      width: 2em;
+      overflow: show;
+      margin: auto;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+    }
+
+    .loading:not(:required):after {
+      content: '';
+      display: block;
+      font-size: 10px;
+      width: 1em;
+      height: 1em;
+      margin-top: -0.5em;
+      -webkit-animation: spinner 1500ms infinite linear;
+      -moz-animation: spinner 1500ms infinite linear;
+      -ms-animation: spinner 1500ms infinite linear;
+      -o-animation: spinner 1500ms infinite linear;
+      animation: spinner 1500ms infinite linear;
+      border-radius: 0.5em;
+      -webkit-box-shadow: rgba(0, 0, 0, 0.75) 1.5em 0 0 0, rgba(0, 0, 0, 0.75) 1.1em 1.1em 0 0, rgba(0, 0, 0, 0.75) 0 1.5em 0 0, rgba(0, 0, 0, 0.75) -1.1em 1.1em 0 0, rgba(0, 0, 0, 0.5) -1.5em 0 0 0, rgba(0, 0, 0, 0.5) -1.1em -1.1em 0 0, rgba(0, 0, 0, 0.75) 0 -1.5em 0 0, rgba(0, 0, 0, 0.75) 1.1em -1.1em 0 0;
+      box-shadow: rgba(0, 0, 0, 0.75) 1.5em 0 0 0, rgba(0, 0, 0, 0.75) 1.1em 1.1em 0 0, rgba(0, 0, 0, 0.75) 0 1.5em 0 0, rgba(0, 0, 0, 0.75) -1.1em 1.1em 0 0, rgba(0, 0, 0, 0.75) -1.5em 0 0 0, rgba(0, 0, 0, 0.75) -1.1em -1.1em 0 0, rgba(0, 0, 0, 0.75) 0 -1.5em 0 0, rgba(0, 0, 0, 0.75) 1.1em -1.1em 0 0;
+    }
+
+    /* Animation */
+
+    @-webkit-keyframes spinner {
+      0% {
+        -webkit-transform: rotate(0deg);
+        -moz-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+        transform: rotate(0deg);
+      }
+
+      100% {
+        -webkit-transform: rotate(360deg);
+        -moz-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        -o-transform: rotate(360deg);
+        transform: rotate(360deg);
+      }
+    }
+
+    @-moz-keyframes spinner {
+      0% {
+        -webkit-transform: rotate(0deg);
+        -moz-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+        transform: rotate(0deg);
+      }
+
+      100% {
+        -webkit-transform: rotate(360deg);
+        -moz-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        -o-transform: rotate(360deg);
+        transform: rotate(360deg);
+      }
+    }
+
+    @-o-keyframes spinner {
+      0% {
+        -webkit-transform: rotate(0deg);
+        -moz-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+        transform: rotate(0deg);
+      }
+
+      100% {
+        -webkit-transform: rotate(360deg);
+        -moz-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        -o-transform: rotate(360deg);
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes spinner {
+      0% {
+        -webkit-transform: rotate(0deg);
+        -moz-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+        transform: rotate(0deg);
+      }
+
+      100% {
+        -webkit-transform: rotate(360deg);
+        -moz-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        -o-transform: rotate(360deg);
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+
+</head>
+
+<body>
+  <!-- This section is what the skeleton of the page is, including the "loding" div -->
+  <div class="container">
+
+    <div class="jumbotron">
+      <h1 class="display-4">Whats Going UP</h1>
+      <p class="lead">This is a simple demo of a rocket launch website</p>
+    </div>
+
+    <div class="loading" id="loader"></div>
+    <div id="accordion"></div>
+  </div>
+
+
+  <script>
+
+    // This here is the base "template" which is copied for each rocket entry. It follows the bootstrap "accordion" pattern. 
+    //    Also note the {{}} vairbles which are different between each rocket. You will see later how they are repalced by rocket details
+    var rocketRow = `
+        <div class="card">
+          <div class="card-header" id="heading{{INDEX}}">
+            <h5 class="mb-0">
+              <button class="btn btn-link" data-toggle="collapse" data-target="#collapse{{INDEX}}" aria-expanded="true"
+                aria-controls="collapse{{INDEX}}">
+                {{LAUNCHNAME}}
+              </button>
+            </h5>
+          </div>
+
+          <div id="collapse{{INDEX}}" class="collapse show" aria-labelledby="heading{{INDEX}}" data-parent="#accordion">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-4">
+
+                        <div class="card">
+                            <canvas class="card-img-top" id="Speed-Gauge{{INDEX}}"></canvas>
+                            <div class="card-body">
+                                <h5 class="card-title">Wind Speed</h5>
+                                <p class="card-text">Launch is delayed if wind speed is over 30 KTS.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="col-4">
+
+                        <div class="card">
+                            <canvas class="card-img-top" id="Temp-Gauge{{INDEX}}"></canvas>
+                            <div class="card-body">
+                                <h5 class="card-title">Thunder Storms</h5>
+                                <p class="card-text">Launch is delayed thunderstorms are nearby.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="card">
+                            <img src="{{IMGSRC}}" class="card-img-top" alt="Rocket Picture">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ROCKETNAME}}</h5>
+                                <a href="{{ROCKETLINK}}" target="_blank" class="btn btn-primary">Wikipeida</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          </div>
+        </div>
+        `;
+
+    // This part uses JQuery to ping the endpoint with the appripriate "CORS" headers to get our rocket launches. Note the "success:" callback function which is called when the request is returned
+    $.ajax({
+      url: "https://us-central1-whatsgoingup-spaceapschallenge.cloudfunctions.net/LoadLaunches",
+      type: "GET",
+      dataType: 'json',
+      contentType: 'application/json',
+      crossDomain: true,
+      headers: {
+        'Access-Control-Allow-Methods': 'GET',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': '*'
+      },
+      success: function (data) {
+
+        // Here we iterate over each element (launch) returned
+        data.forEach((element, index) => {
+
+          // Make a duplicate of the template html
+          var myRow = Object.assign(rocketRow);
+
+          // Replace all of those {{}} lookup functions with the appropriate rocket name
+          myRow = myRow.replaceAll("{{LAUNCHNAME}}", element.name);
+          myRow = myRow.replaceAll("{{INDEX}}", index);
+          myRow = myRow.replaceAll("{{IMGSRC}}", element.rocket.imageURL);
+          myRow = myRow.replaceAll("{{ROCKETNAME}}", element.rocket.name);
+          myRow = myRow.replaceAll("{{ROCKETLINK}}", element.rocket.wikiURL);
+
+          // Append the completed template to the accordian element in the page skeleton
+          $('#accordion').append(myRow);
+
+          // For each newly appended item, make the gages work, see the "UpdateElements" function bleow
+          UpdateElements(index, element);
+
+          // Dump the elemnt to the console so we can see what it all contains, useful for debugging. Alt + F11 to open it in chrome.
+          console.log('element', element);
+
+          // If the elemnt is not the first one, collapse it to make the UI a bit better. Otherwise they would all be expanded
+          if (index > 0) {
+            $('#collapse' + index).collapse('toggle');
+          }
+        });
+
+        // Finally, hide the loader spinner because we have data
+        $('#loader').hide();
+      }
+    });
+
+
+    // This fucntion configures and initializes the gauges
+    function UpdateElements(index, element) {
+
+      // Just in case we don't have predictors in the data set (because of no launch pad?), set he defaults to "0" value;
+      if (element.WGUPred.Predictors.length === 0) {
+        element.WGUPred.Predictors.push({ 'Value': 0 });
+        element.WGUPred.Predictors.push({ 'Value': 0 });
+      }
+
+      // Defaults for the WindspeedGage
+      var SpeedOpts = {
+        angle: -0.2, // The span of the gauge arc
+        lineWidth: 0.2, // The line thickness
+        radiusScale: 1, // Relative radius
+        pointer: {
+          length: 0.6, // // Relative to gauge radius
+          strokeWidth: 0.035, // The thickness
+          color: '#000000' // Fill color
+        },
+        limitMax: false,     // If false, max value increases automatically if value > maxValue
+        limitMin: false,     // If true, the min value of the gauge will be fixed
+        colorStart: '#6FADCF',   // Colors
+        colorStop: '#8FC0DA',    // just experiment with them
+        strokeColor: '#E0E0E0',  // to see which ones work best for you
+        generateGradient: true,
+        highDpiSupport: true,     // High resolution support
+        staticZones: [
+          { strokeStyle: "#00FF00", min: 0, max: 20 }, // Green
+          { strokeStyle: "#FFDD00", min: 20, max: 30 }, // Yellow
+          { strokeStyle: "#FF0000", min: 30, max: 50 }, // Red from 100 to 130
+        ],
+        staticLabels: {
+          font: "16px sans-serif",  // Specifies font
+          labels: [0, 20, 30, 50],  // Print labels at these values
+          color: "#000000",  // Optional: Label text color
+          fractionDigits: 0  // Optional: Numerical precision. 0=round off.
+        },
+      };
+
+      // Create the windspeed gage
+      selectGauge = new Gauge(document.getElementById("Speed-Gauge" + index)).setOptions(SpeedOpts);;
+      selectGauge.maxValue = 50;
+      selectGauge.set(element.WGUPred.Predictors[0].Value);
+
+      // Set the defaults for the thunder gage
+      var TempOpts = {
+        angle: -0.2, // The span of the gauge arc
+        lineWidth: 0.2, // The line thickness
+        radiusScale: 1, // Relative radius
+        pointer: {
+          length: 0.6, // // Relative to gauge radius
+          strokeWidth: 0.035, // The thickness
+          color: '#000000' // Fill color
+        },
+        limitMax: false,     // If false, max value increases automatically if value > maxValue
+        limitMin: false,     // If true, the min value of the gauge will be fixed
+        colorStart: '#6FADCF',   // Colors
+        colorStop: '#8FC0DA',    // just experiment with them
+        strokeColor: '#E0E0E0',  // to see which ones work best for you
+        generateGradient: true,
+        highDpiSupport: true,     // High resolution support
+        staticZones: [
+          { strokeStyle: "#00FF00", min: 0, max: 60 }, // Green
+          { strokeStyle: "#FFDD00", min: 60, max: 100 }, // Yellow
+          { strokeStyle: "#FF0000", min: 90, max: 100 }, // Red from 100 to 130
+        ],
+        staticLabels: {
+          font: "16px sans-serif",  // Specifies font
+          labels: [0, 60, 90, 100],  // Print labels at these values
+          color: "#000000",  // Optional: Label text color
+          fractionDigits: 0  // Optional: Numerical precision. 0=round off.
+        },
+      };
+
+      // configure the tunder gage
+      selectGauge = new Gauge(document.getElementById("Temp-Gauge" + index)).setOptions(TempOpts);;
+      selectGauge.maxValue = 100;
+      selectGauge.set(element.WGUPred.Predictors[1].Value * 100);
+    }
+
+    // This is a handy function ro replace ALL of the items (string.replace() only gets the first occurence!)
+    String.prototype.replaceAll = function (search, replacement) {
+      var target = this;
+      return target.replace(new RegExp(search, 'g'), replacement);
+    };
+
+  </script>
+</body>
+
+</html>
