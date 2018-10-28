@@ -1,8 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { Launch } from './launch';
-import { DataSnapshot } from 'firebase-functions/lib/providers/database';
-import { document } from 'firebase-functions/lib/providers/firestore';
 
 const Client = require('node-rest-client').Client;
 
@@ -28,49 +26,9 @@ interface DataReturn {
   Predictors: DataPoint[];
 }
 
-const express = require('express');
 const cors = require('cors')({ origin: true });
 
-export const ReadEndpoint = functions.https.onRequest(async (request, response) => {
-
-  let loc = request.query.loc;
-  let day = new Date(Date.parse(request.query.date));
-
-  console.log('Input data', loc, day, request.query.date)
-  if (!loc) {
-    loc = '32899'
-  }
-
-  if (!day) {
-    day = new Date();
-  }
-
-  const data = await readEndpoint(loc, day);
-
-  response.send(JSON.stringify(data));
-});
-
-export const GetLaunchData = functions.https.onRequest(async (request, response) => {
-  cors(request, response, async () => {
-    let loc = request.query.loc;
-    let day = new Date(Date.parse(request.query.date));
-
-    console.log('Input data', loc, day, request.query.date)
-    if (!loc) {
-      loc = '32899'
-    }
-
-    if (!day) {
-      day = new Date();
-    }
-
-    const output: DataReturn = await CalcLaunchPredictors(loc, day);
-
-    response.send(output);
-  });
-});
-
-async function CalcLaunchPredictors(loc: string, day: Date, launchId: string = null): Promise<DataReturn> {
+async function CalcLaunchPredictors(loc: string, day: Date, launchId: string = null, update: boolean = false): Promise<DataReturn> {
 
   const output: DataReturn = {
     LaunchDate: day,
@@ -78,8 +36,13 @@ async function CalcLaunchPredictors(loc: string, day: Date, launchId: string = n
     Predictors: []
   }
 
-  const data = await getlatestforecast(launchId);
-  //const data = await readEndpoint(loc, day);
+  let data: any = [];
+
+  if (update) {
+    data = await readEndpoint(loc, day);
+  } else {
+    data = await getlatestforecast(launchId);
+  }
 
   if (data) {
 
@@ -102,12 +65,15 @@ async function CalcLaunchPredictors(loc: string, day: Date, launchId: string = n
 // Gets the latest forecast from the db rather than the endpoint
 async function getlatestforecast(launchId: string) {
 
-  const launchRef = await db.collection('Launches').doc(String(launchId)).collection('Forecast').get();
+  const ref = await db.collection('Launches').doc(String(launchId)).collection('Forecast');
+
+  const launchRef = await ref.orderBy('DateCalculated', 'desc').limit(1).get()
 
   if (launchRef.docs.length > 0) {
+
     const val = await launchRef.docs[0].data();
     const json = JSON.parse(val.Forecast);
-    console.log('Found exting forecast', json);
+    console.log('Found exting forecast', val.DateCalculated);
     return json;
   }
 
@@ -188,7 +154,7 @@ export const LoadLaunches = functions.https.onRequest(async (request, response) 
     const launchesRef = db.collection('Launches');
     const snapshot = await launchesRef.get();
 
-    const dataOut: any[] = [];
+    let dataOut: any[] = [];
 
     await asyncForEach(snapshot.docs, async (doc) => {
       const data = doc.data();
@@ -198,6 +164,52 @@ export const LoadLaunches = functions.https.onRequest(async (request, response) 
         const loc = pad.latitude + ',' + pad.longitude;
         const date = new Date(Date.parse(data.net));
         const pred = await CalcLaunchPredictors(loc, date, String(data.id));
+
+        data.WGUPred = pred;
+      }
+
+      dataOut.push(data);
+    });
+
+    dataOut.sort((a, b) => Date.parse(a.windowstart) - Date.parse(b.windowstart));
+    dataOut = dataOut.filter(d => Date.parse(d.windowstart) > (Date.now()).valueOf());
+
+    response.send(dataOut);
+  });
+});
+
+export const UpdateLaunchList = functions.https.onRequest(async (request, response) => {
+
+  const url = "https://launchlibrary.net/1.4/launch?mode=verbose";
+  const data: Launch[] = (await callendpoint(url)).launches;
+  console.log('Launch Data', data);
+
+  for (let item of data) {
+
+    const docId = String(item.id);
+    console.log('editing doc path', docId, item);
+
+    const ref = await db.collection('Launches').doc(String(item.id)).set(item);
+  }
+
+  response.send(data.length + ' launches updates!');
+});
+
+export const UpdateForecasts = functions.https.onRequest(async (request, response) => {
+  cors(request, response, async () => {
+    const launchesRef = db.collection('Launches');
+    const snapshot = await launchesRef.get();
+
+    const dataOut: any[] = [];
+
+    await asyncForEach(snapshot.docs, async (doc) => {
+      const data = doc.data();
+      const pad = data.location.pads[0];
+
+      if (pad) {
+        const loc = pad.latitude + ',' + pad.longitude;
+        const date = new Date(Date.parse(data.net));
+        const pred = await CalcLaunchPredictors(loc, date, String(data.id), true);
 
         data.WGUPred = pred;
       }
@@ -216,55 +228,19 @@ async function asyncForEach(array, callback) {
   }
 }
 
-export const UpdateLaunches = functions.https.onRequest(async (request, response) => {
-
-  const url = "https://launchlibrary.net/1.4/launch?mode=verbose";
-  const data: Launch[] = (await callendpoint(url)).launches;
-  console.log('Launch Data', data);
-
-  for (let item of data) {
-
-    const docId = String(item.id);
-    console.log('editing doc path', docId, item);
-
-    const ref = await db.collection('Launches').doc(String(item.id)).set(item);
-  }
-
-  response.send(data.length + ' launches updates!');
-});
-
 function callendpoint(url: string): Promise<any> {
-  return new Promise(function (resolve, reject) {
-    client.get(url, (data, getresponse) => {
+  return new Promise(function (resolve) {
+    client.get(url, (data) => {
       console.log('Resolving');
       resolve(data);
     });
   });
 }
 
-export const TestCreateForecast = functions.https.onRequest(async (request, response) => {
-
-  const pct: number = request.query.pct ? request.query.pct : 10;
-  const date: Date = request.query.date ? new Date(Date.parse(request.query.date)) : new Date((new Date()).setDate((new Date()).getDate() + 10));
-
-  console.log('Data import', date, request.query.date);
-
-  const launchId = "rNWcF4xUu6KGee57570k";
-
-  await CreateForecastFirestore(pct, date, launchId);
-
-  response.send('document added!');
-});
-
 async function CreateForecastFirestore(forecast: any, forecastDate: Date, launchId: string) {
 
   const newDocRef = await db.collection('Launches').doc(launchId).collection('Forecast').doc();
 
-  const setDoc = await newDocRef.set({
-    DateCalculated: new Date(),
-    ForecastDate: forecastDate,
-    Forecast: JSON.stringify(forecast)
-  });
 
 }
 
