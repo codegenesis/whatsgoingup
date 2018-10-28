@@ -355,7 +355,8 @@
             const tag = element.hashtag.replace("#", '');
             myRow = myRow.replaceAll("{{HASHTAG}}", '<a href="https://twitter.com/hashtag/' + tag + '"  target="_blank" class="btn btn-primary">' + element.hashtag + '</a>');
           } else {
-            myRow = myRow.replaceAll("{{HASHTAG}}", 'No Hashtags found');
+            const tag = element.name.split("|")[1];
+            myRow = myRow.replaceAll("{{HASHTAG}}", '<a href="https://twitter.com/search?q=' + tag + '"  target="_blank" class="btn btn-primary">Search Twitter</a>');
           }
 
           if (element.missions.length > 0) {
