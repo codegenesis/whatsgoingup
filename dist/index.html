@@ -236,7 +236,7 @@
             <div class="col-lg-4">
               <div class="card">
                 <div class="card-body">
-                  <h5 class="card-title">VECHICLE</h5>
+                  <h5 class="card-title">VEHICLE</h5>
                   <div id="stl_cont{{INDEX}}"></div> 
                   <p class="card-text">Name: {{ROCKETNAME}}</p>
                   <a href="{{ROCKETLINK}}" target="_blank" class="btn btn-primary">Wikipedia Link</a>
@@ -317,10 +317,12 @@
           myRow = myRow.replaceAll("{{ROCKETNAME}}", element.rocket.name);
           myRow = myRow.replaceAll("{{ROCKETLINK}}", element.rocket.wikiURL);
 
-          var datest = new Date(Date.parse(element.windowstart)).toLocaleString();
+          var options = { timeZoneName: 'short' };
+
+          var datest = new Date(Date.parse(element.windowstart)).toLocaleString(undefined, options);
           myRow = myRow.replaceAll("{{LAUNCHDATE}}", 'Launch Window Opens: ' + datest);
 
-          var dateend = new Date(Date.parse(element.windowend)).toLocaleString();
+          var dateend = new Date(Date.parse(element.windowend)).toLocaleString(undefined, options);
           myRow = myRow.replaceAll("{{LAUNCHWINDOW}}", 'Launch Window Closes: ' + dateend);
 
           let urls = "";
@@ -338,7 +340,7 @@
           myRow = myRow.replaceAll("{{VIDEOURLS}}", urls);
 
           if (element.location) {
-            myRow = myRow.replaceAll("{{LAUNCHSITE}}", 'Launch Loaction: ' + element.location.name);
+            myRow = myRow.replaceAll("{{LAUNCHSITE}}", 'Launch Location: ' + element.location.name);
 
             if (element.location.pads.length > 0) {
               myRow = myRow.replaceAll("{{PADLINK}}", element.location.pads[0].mapURL);
@@ -347,7 +349,7 @@
             }
 
           } else {
-            myRow = myRow.replaceAll("{{LAUNCHSITE}}", 'Launch Loaction: Unknown');
+            myRow = myRow.replaceAll("{{LAUNCHSITE}}", 'Launch Location: Unknown');
             myRow = myRow.replaceAll("{{PADLINK}}", '#');
           }
 
@@ -380,7 +382,7 @@
 
 
 
-          // Append the completed template to the accordian element in the page skeleton
+          // Append the completed template to the acordian element in the page skeleton
           $('#accordion').append(myRow);
 
           // For each newly appended item, make the gages work, see the "UpdateElements" function bleow
